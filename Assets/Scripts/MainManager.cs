@@ -12,20 +12,28 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
-    
+    public Text nameText;
+    public Text highestScoreText;
+
     private bool m_Started = false;
     private int m_Points;
-    
+    private int currentScore;
+    private string playerName;
+
     private bool m_GameOver = false;
 
-    
-    // Start is called before the first frame update
+    private void Awake()
+    {
+        SetPlayerName(GameManager.Instance.userName);
+        LoadPlayerData();
+    }
+
     void Start()
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
+
+        int[] pointCountArray = new[] { 1, 1, 2, 2, 5, 5 };
         for (int i = 0; i < LineCount; ++i)
         {
             for (int x = 0; x < perLine; ++x)
@@ -70,7 +78,38 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        UpdateScore(m_Points);
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+
+    public void SetPlayerName(string name)
+    {
+        playerName = name;
+        nameText.text = "Name: " + playerName;
+        LoadPlayerData();
+    }
+
+    private void LoadPlayerData()
+    {
+        int highScore = PlayerPrefs.GetInt(playerName + "_highScore", 0);
+        highestScoreText.text = "Best Score: " + highScore.ToString();
+    }
+
+    public void UpdateScore(int score)
+    {
+        currentScore = score;
+        int highScore = PlayerPrefs.GetInt(playerName + "_highScore", 0);
+
+        if (currentScore > highScore)
+        {
+            PlayerPrefs.SetInt(playerName + "_highScore", currentScore);
+            PlayerPrefs.Save();
+            highestScoreText.text = "Best Score: " + currentScore.ToString();
+        }
+    }
+    public void BackToMainMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 }
